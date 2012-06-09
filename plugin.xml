@@ -15,10 +15,10 @@
     <!-- UI extension -->
     <adminconsole>		
 		<tab id="tab-server">
-			<sidebar id="sidebar-server-settings">
-				<item id="otrproxy-props-edit-form" name="otrProxy"
+			<sidebar id="otrProxy" name="otrProxy" description="Click to configure otrProxy">
+				<item id="otrproxy-props-edit-form" name="Settings"
 					url="otrproxy-props-edit-form.jsp"
-					description="Click to configure otrProxy" />
+					description="Click to configure otrProxy settings" />
 			</sidebar>
         </tab>
     </adminconsole>

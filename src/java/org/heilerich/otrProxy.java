@@ -37,6 +37,33 @@ public class otrProxy implements Plugin, PacketInterceptor {
      */
     public static final String ENABLED_PROPERTY = "plugin.otrproxy.enabled";
 	private boolean pluginEnabled;
+	
+	public static final String CMD_STATUS_PROPERTY = "plugin.otrproxy.cmd.start";
+	private String cmdStatus;
+	
+	public static final String CMD_START_PROPERTY = "plugin.otrproxy.cmd.start";
+	private String cmdStart;
+	
+	public static final String CMD_STOP_PROPERTY = "plugin.otrproxy.cmd.stop";
+	private String cmdStop;
+	
+	public static final String CMD_REFRESH_PROPERTY = "plugin.otrproxy.cmd.refresh";
+	private String cmdRefresh;
+	
+	public static final String CMD_MYFP_PROPERTY = "plugin.otrproxy.cmd.myfp";
+	private String cmdMyfp;
+	
+	public static final String CMD_FP_PROPERTY = "plugin.otrproxy.cmd.fp";
+	private String cmdFp;
+	
+	public static final String CMD_VERIFY_PROPERTY = "plugin.otrproxy.cmd.verify";
+	private String cmdVerify;
+	
+	public static final String CMD_UNVERIFY_PROPERTY = "plugin.otrproxy.cmd.unverify";
+	private String cmdUnverify;
+	
+	public static final String CMD_HELP_PROPERTY = "plugin.otrproxy.cmd.help";
+	private String cmdHelp;
 
     /**
      * the hook into the inteceptor chain
@@ -74,16 +101,105 @@ public class otrProxy implements Plugin, PacketInterceptor {
      */
     public void reset() {
         setPluginEnabled(true);
+		setCmdStatus("!!status");
+		setCmdStart("!!start");
+		setCmdStop("!!stop");
+		setCmdRefresh("!!refresh");
+		setCmdMyfp("!!myfingerprint");
+		setCmdFp("!!fingerprint");
+		setCmdVerify("!!verify");
+		setCmdUnverify("!!unverify");
+		setCmdHelp("!!help");
     }
     
     public boolean isPluginEnabled() {
         return pluginEnabled;
     }
+	
+	public String getCmdStatus() {
+        return cmdStatus;
+    }
+	
+	public String getCmdStart() {
+        return cmdStart;
+    }
+	
+	public String getCmdStop() {
+        return cmdStop;
+    }
+	
+	public String getCmdRefresh() {
+        return cmdRefresh;
+    }
+	
+	public String getCmdMyfp() {
+        return cmdMyfp;
+    }
+	
+	public String getCmdFp() {
+        return cmdFp;
+    }
+	
+	public String getCmdVerify() {
+        return cmdVerify;
+    }
+	
+	public String getCmdUnverify() {
+        return cmdUnverify;
+    }
+	
+	public String getCmdHelp() {
+        return cmdHelp;
+    }
     
     public void setPluginEnabled(boolean enabled) {
         pluginEnabled = enabled;
-        JiveGlobals.setProperty(ENABLED_PROPERTY, enabled ? "true"
-                : "false");
+        JiveGlobals.setProperty(ENABLED_PROPERTY, enabled ? "true" : "false");
+    }
+	
+	public void setCmdStatus(String cmd) {
+        cmdStatus = cmd;
+        JiveGlobals.setProperty(CMD_STATUS_PROPERTY, cmd);
+    }
+	
+	public void setCmdStart(String cmd) {
+        cmdStart = cmd;
+        JiveGlobals.setProperty(CMD_START_PROPERTY, cmd);
+    }
+	
+	public void setCmdStop(String cmd) {
+        cmdStop = cmd;
+        JiveGlobals.setProperty(CMD_STOP_PROPERTY, cmd);
+    }
+	
+	public void setCmdRefresh(String cmd) {
+        cmdRefresh = cmd;
+        JiveGlobals.setProperty(CMD_REFRESH_PROPERTY, cmd);
+    }
+	
+	public void setCmdMyfp(String cmd) {
+        cmdMyfp = cmd;
+        JiveGlobals.setProperty(CMD_MYFP_PROPERTY, cmd);
+    }
+	
+	public void setCmdFp(String cmd) {
+        cmdFp = cmd;
+        JiveGlobals.setProperty(CMD_FP_PROPERTY, cmd);
+    }
+	
+	public void setCmdVerify(String cmd) {
+        cmdVerify = cmd;
+        JiveGlobals.setProperty(CMD_VERIFY_PROPERTY, cmd);
+    }
+	
+	public void setCmdUnverify(String cmd) {
+        cmdUnverify = cmd;
+        JiveGlobals.setProperty(CMD_UNVERIFY_PROPERTY, cmd);
+    }
+	
+	public void setCmdHelp(String cmd) {
+        cmdHelp = cmd;
+        JiveGlobals.setProperty(CMD_HELP_PROPERTY, cmd);
     }
 
 	/**
@@ -91,27 +207,30 @@ public class otrProxy implements Plugin, PacketInterceptor {
      */
     public void initializePlugin(PluginManager pManager, File pluginDirectory) {
 		Log.info("init follows");
-        // configure this plugin
         initProxy();
 		Log.info("init finished, adding interceptor");
-        // register with interceptor manager
         interceptorManager.addInterceptor(this);
 		Log.info("interceptor added");
     }
 
     private void initProxy() {
-        // default to true
-        pluginEnabled = JiveGlobals.getBooleanProperty(
-                ENABLED_PROPERTY, true);
+        pluginEnabled = JiveGlobals.getBooleanProperty(ENABLED_PROPERTY, true);
+		cmdStatus = JiveGlobals.getProperty(CMD_STATUS_PROPERTY, "!!status");
+		cmdStart = JiveGlobals.getProperty(CMD_START_PROPERTY, "!!start");
+		cmdStop = JiveGlobals.getProperty(CMD_STOP_PROPERTY, "!!stop");
+		cmdRefresh = JiveGlobals.getProperty(CMD_REFRESH_PROPERTY, "!!refresh");
+		cmdMyfp = JiveGlobals.getProperty(CMD_MYFP_PROPERTY, "!!myfingerprint");
+		cmdFp = JiveGlobals.getProperty(CMD_FP_PROPERTY, "!!fingerprint");
+		cmdVerify = JiveGlobals.getProperty(CMD_VERIFY_PROPERTY, "!!verify");
+		cmdUnverify = JiveGlobals.getProperty(CMD_UNVERIFY_PROPERTY, "!!unverify");
+		cmdHelp = JiveGlobals.getProperty(CMD_HELP_PROPERTY, "!!help");
     }
 
     public void destroyPlugin() {
         interceptorManager.removeInterceptor(this);
     }
 
-    public void interceptPacket(Packet packet, Session session, boolean read,
-            boolean processed) throws PacketRejectedException {
-			
+    public void interceptPacket(Packet packet, Session session, boolean read, boolean processed) throws PacketRejectedException {
 		if(!pluginEnabled)
 			return;
         if (isValidTargetPacket(packet, read, processed)) {
@@ -163,7 +282,8 @@ public class otrProxy implements Plugin, PacketInterceptor {
 	private boolean checkCommands(Message msg) {
 		JID localuser = msg.getFrom();
 		JID remoteuser = msg.getTo();
-		if(msg.getBody().startsWith("!!status")) {
+		
+		if(msg.getBody().startsWith(cmdStatus)) {
 			String sstatus = getUserRepr(localuser).getSessionStatus(remoteuser);
 			boolean verified = getUserRepr(localuser).isVerified(remoteuser);
 			msg.setBody("[otr-server] session is " + sstatus + ((sstatus=="encrypted") ? (". Fingerprint is " + ((verified) ? "verified" : "unverified")) : ""));
@@ -171,64 +291,64 @@ public class otrProxy implements Plugin, PacketInterceptor {
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!start")) {
+		if(msg.getBody().startsWith(cmdStart)) {
 			msg.setBody("[otr-server] starting session");
 			getUserRepr(localuser).startSession(remoteuser);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!stop")) {
+		if(msg.getBody().startsWith(cmdStop)) {
 			msg.setBody("[otr-server] stopping session");
 			getUserRepr(localuser).endSession(remoteuser);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!refresh")) {
+		if(msg.getBody().startsWith(cmdRefresh)) {
 			msg.setBody("[otr-server] refreshing session");
 			getUserRepr(localuser).refreshSession(remoteuser);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!myfingerprint")) {
+		if(msg.getBody().startsWith(cmdMyfp)) {
 			String fprint = getUserRepr(localuser).getLocalFingerprint(remoteuser);
 			msg.setBody("[otr-server] Your Fingerprint is " + fprint);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!fingerprint")) {
+		if(msg.getBody().startsWith(cmdFp)) {
 			String fprint = getUserRepr(localuser).getRemoteFingerprint(remoteuser);
 			msg.setBody("[otr-server] The Fingerprint is " + fprint);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!verify")) {
+		if(msg.getBody().startsWith(cmdVerify)) {
 			msg.setBody("[otr-server] verify fingerprint");
 			getUserRepr(localuser).verify(remoteuser);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!unverify")) {
+		if(msg.getBody().startsWith(cmdUnverify)) {
 			msg.setBody("[otr-server] unverify fingerprint");
 			getUserRepr(localuser).unverify(remoteuser);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
 			return true;
 		}
-		if(msg.getBody().startsWith("!!help")) {
-			String cmdlist = "!!start - start otr session\n";
-			cmdlist += "!!stop - end otr session\n";
-			cmdlist += "!!status - show encrpytion and verification status of the session\n";
-			cmdlist += "!!refresh - refresh otr session\n";
-			cmdlist += "!!myfingerprint - show your own public key fingerprint\n";
-			cmdlist += "!!fingerprint - show your buddy's public key fingerprint for verification\n";
-			cmdlist += "!!verify - mark your buddy's public key fingerprint as verified\n";
-			cmdlist += "!!unverfiy - mark your buddy's public key fingerprint as unverified\n";
+		if(msg.getBody().startsWith(cmdHelp)) {
+			String cmdlist = cmdStart + " - start otr session\n";
+			cmdlist += cmdStop + " - end otr session\n";
+			cmdlist += cmdStatus + " - show encrpytion and verification status of the session\n";
+			cmdlist += cmdRefresh + " - refresh otr session\n";
+			cmdlist += cmdMyfp + " - show your own public key fingerprint\n";
+			cmdlist += cmdFp + " - show your buddy's public key fingerprint for verification\n";
+			cmdlist += cmdVerify + " - mark your buddy's public key fingerprint as verified\n";
+			cmdlist += cmdUnverify + " - mark your buddy's public key fingerprint as unverified\n";
 			msg.setBody("[otr-server]\n" + cmdlist);
 			msg.setTo(localuser);
 			msg.setFrom(remoteuser);
