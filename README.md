@@ -8,7 +8,7 @@ Build it using the Openfire Plugin Build Script.
 
 Installation
 ------------
-Upload it to the Admin Console of Openfire. There are no settings yet. Learn about the commands by typing `!!help` in a chat session.
+Upload it to the Admin Console of Openfire. Settings can be found in the Admin Console. Learn about the chat commands by typing `!!help` in a chat session.
 
 Dependencies
 ------------
