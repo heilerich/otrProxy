@@ -38,7 +38,7 @@ public class otrProxy implements Plugin, PacketInterceptor {
     public static final String ENABLED_PROPERTY = "plugin.otrproxy.enabled";
 	private boolean pluginEnabled;
 	
-	public static final String CMD_STATUS_PROPERTY = "plugin.otrproxy.cmd.start";
+	public static final String CMD_STATUS_PROPERTY = "plugin.otrproxy.cmd.status";
 	private String cmdStatus;
 	
 	public static final String CMD_START_PROPERTY = "plugin.otrproxy.cmd.start";
@@ -64,6 +64,9 @@ public class otrProxy implements Plugin, PacketInterceptor {
 	
 	public static final String CMD_HELP_PROPERTY = "plugin.otrproxy.cmd.help";
 	private String cmdHelp;
+	
+	public static final String CMD_KEYFILE_PROPERTY = "plugin.otrproxy.keyfile";
+	private String propKeyfile;
 
     /**
      * the hook into the inteceptor chain
@@ -110,6 +113,7 @@ public class otrProxy implements Plugin, PacketInterceptor {
 		setCmdVerify("!!verify");
 		setCmdUnverify("!!unverify");
 		setCmdHelp("!!help");
+		setPropKeyfile("key-store.dat");
     }
     
     public boolean isPluginEnabled() {
@@ -150,6 +154,10 @@ public class otrProxy implements Plugin, PacketInterceptor {
 	
 	public String getCmdHelp() {
         return cmdHelp;
+    }
+	
+	public String getPropKeyfile() {
+        return propKeyfile;
     }
     
     public void setPluginEnabled(boolean enabled) {
@@ -201,6 +209,11 @@ public class otrProxy implements Plugin, PacketInterceptor {
         cmdHelp = cmd;
         JiveGlobals.setProperty(CMD_HELP_PROPERTY, cmd);
     }
+	
+	public void setPropKeyfile(String cmd) {
+        propKeyfile = cmd;
+        JiveGlobals.setProperty(CMD_KEYFILE_PROPERTY, cmd);
+    }
 
 	/**
      * init
@@ -224,6 +237,7 @@ public class otrProxy implements Plugin, PacketInterceptor {
 		cmdVerify = JiveGlobals.getProperty(CMD_VERIFY_PROPERTY, "!!verify");
 		cmdUnverify = JiveGlobals.getProperty(CMD_UNVERIFY_PROPERTY, "!!unverify");
 		cmdHelp = JiveGlobals.getProperty(CMD_HELP_PROPERTY, "!!help");
+		propKeyfile = JiveGlobals.getProperty(CMD_KEYFILE_PROPERTY, "key-store.dat");
     }
 
     public void destroyPlugin() {
@@ -362,7 +376,7 @@ public class otrProxy implements Plugin, PacketInterceptor {
 		if(repr!=null) {
 			return repr;
 		} else {
-			UserRepr.put(inuser.toBareJID(),new otrUserRepresentation(inuser));
+			UserRepr.put(inuser.toBareJID(),new otrUserRepresentation(inuser, propKeyfile));
 			repr = UserRepr.get(inuser.toBareJID());
 			return repr;
 		}

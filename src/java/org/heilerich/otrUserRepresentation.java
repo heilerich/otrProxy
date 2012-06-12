@@ -53,10 +53,10 @@ public class otrUserRepresentation {
 	private DefaultPropertiesStore store;
 	private static final Logger Log = LoggerFactory.getLogger(MyOtrEngineHost.class);
 	
-	public otrUserRepresentation(JID user) {
+	public otrUserRepresentation(JID user, String keyfile) {
 		owner = user;
 		try{
-			store = new DefaultPropertiesStore("key-store.dat");
+			store = new DefaultPropertiesStore(keyfile);
 		}catch(IOException ioe){
 			Log.error("Otr-Proxy: Failed to open key-store.dat", ioe);
 		}
@@ -314,11 +314,22 @@ class DefaultPropertiesStore implements OtrKeyManagerStore {
 	}
 
 	public void setProperty(String id, boolean value) {
+		loadProperties();
 		properties.setProperty(id, "true");
 		try {
 				this.store();
 		} catch (Exception e) {
 				e.printStackTrace();
+		}
+	}
+	
+	private void loadProperties() {
+		try {
+			InputStream in = new BufferedInputStream(new FileInputStream(getConfigurationFile()));
+			properties.load(in);
+			in.close();
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -329,6 +340,7 @@ class DefaultPropertiesStore implements OtrKeyManagerStore {
 	}
 
 	public void setProperty(String id, byte[] value) {
+		loadProperties();
 		properties.setProperty(id, new String(Base64.encode(value)));
 		try {
 				this.store();
@@ -338,10 +350,17 @@ class DefaultPropertiesStore implements OtrKeyManagerStore {
 	}
 
 	public void removeProperty(String id) {
+		loadProperties();
 		properties.remove(id);
+		try {
+				this.store();
+		} catch (Exception e) {
+				e.printStackTrace();
+		}
 	}
 
 	public byte[] getPropertyBytes(String id) {
+		loadProperties();
 		String value = properties.getProperty(id);
 		if(value!=null)
 			return Base64.decode(value);
@@ -350,6 +369,7 @@ class DefaultPropertiesStore implements OtrKeyManagerStore {
 	}
 
 	public boolean getPropertyBoolean(String id, boolean defaultValue) {
+		loadProperties();
 		try {
 				return Boolean.valueOf(properties.get(id).toString());
 		} catch (Exception e) {

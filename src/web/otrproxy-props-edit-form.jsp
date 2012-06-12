@@ -26,6 +26,7 @@
 	String cmdVerify = ParamUtils.getParameter(request, "cmdverify");
 	String cmdUnverify = ParamUtils.getParameter(request, "cmdunverify");
 	String cmdHelp = ParamUtils.getParameter(request, "cmdhelp");
+	String propKeyfile = ParamUtils.getParameter(request, "propkeyfile");
     
 	otrProxy plugin = (otrProxy) XMPPServer.getInstance().getPluginManager().getPlugin("otrproxy");
 
@@ -39,7 +40,6 @@
 						&& cmdVerify.length()>MINCMD
 						&& cmdUnverify.length()>MINCMD
 						&& cmdHelp.length()>MINCMD);
-						
 		if(!cmderr) {
 			plugin.setPluginEnabled(pluginEnabled);
 			plugin.setCmdStatus(cmdStatus);
@@ -51,6 +51,7 @@
 			plugin.setCmdVerify(cmdVerify);
 			plugin.setCmdUnverify(cmdUnverify);
 			plugin.setCmdHelp(cmdHelp);
+			plugin.setPropKeyfile(propKeyfile);
 			response.sendRedirect("otrproxy-props-edit-form.jsp?success=true");
 		} else {
 			response.sendRedirect("otrproxy-props-edit-form.jsp?error=cmd");
@@ -71,6 +72,7 @@
 	cmdVerify = plugin.getCmdVerify();
 	cmdUnverify = plugin.getCmdUnverify();
 	cmdHelp = plugin.getCmdHelp();
+	propKeyfile = plugin.getPropKeyfile();
 
 %>
 
@@ -146,7 +148,8 @@ Use the form below to edit otrproxy settings.<br>
 	</tbody>
 	</table>
 </div>
-	<div class="jive-contentBoxHeader">
+
+<div class="jive-contentBoxHeader">
 	Chat Commands
 </div>
 <div class="jive-contentBox">
@@ -242,6 +245,24 @@ Use the form below to edit otrproxy settings.<br>
 			</label>
 		</td>
 	</tr>
+	</tbody>
+	</table>
+</div>
+
+<div class="jive-contentBoxHeader">
+	Key Storage File
+</div>
+<div class="jive-contentBox">
+	<table border="0" cellpadding="3" cellspacing="0">
+	<tbody>
+		<td nowrap="nowrap" width="1%">
+			<input name="propkeyfile" value="<%= propKeyfile %>" type="text">
+		</td>
+		<td width="99%">
+			<label>
+				- path to Key Storage File
+			</label>
+		</td>
 	</tbody>
 	</table>
 </div>
